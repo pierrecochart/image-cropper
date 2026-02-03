@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Image Cropper (Custom Sizes)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 650px; }
+        h1 { margin-top: 0; color: #333; font-size: 24px; text-align: center; }
+        
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        input[type="file"] { width: 100%; padding: 10px; background: #f9f9f9; border: 2px dashed #ccc; border-radius: 6px; text-align: center; cursor: pointer; }
+        
+        /* Size Manager Styles */
+        .size-input-wrapper { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
+        .size-input-group { flex: 1; }
+        .btn-add { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 42px; }
+        .btn-add:hover { background-color: #218838; }
+        
+        .size-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px; min-height: 40px; border: 1px solid #eee; }
+        .size-tag { background: #e2e6ea; padding: 5px 12px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; color: #333; font-weight: 500; }
+        .size-remove { color: #dc3545; cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; }
+        .size-remove:hover { color: #bd2130; }
+
+        /* Main Action Button */
+        .btn-process { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        .btn-process:hover { background-color: #0056b3; }
+        .btn-process:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* Logs */
+        #status { margin-top: 20px; padding: 10px; background: #eef; border-radius: 6px; font-size: 14px; color: #333; display: none; white-space: pre-line; max-height: 300px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Image Cropper & Resizer</h1>
+    
+    <div class="form-group">
+        <label for="baseName">Base Name</label>
+        <input type="text" id="baseName" value="CampaignV1" placeholder="e.g. CampaignV1">
+    </div>
+
+    <div class="form-group">
+        <label for="trimPercent">Bottom Trim Percentage (%)</label>
+        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Removes this % from the bottom (e.g. 10 for watermark removal)</div>
+        <input type="number" id="trimPercent" value="10" min="0" max="50">
+    </div>
+
+    <div class="form-group">
+        <label>Target Sizes (Width x Height)</label>
+        <div class="size-input-wrapper">
+            <div class="size-input-group">
+                <input type="number" id="newWidth" placeholder="Width (px)">
+            </div>
+            <div class="size-input-group">
+                <input type="number" id="newHeight" placeholder="Height (px)">
+            </div>
+            <button class="btn-add" onclick="addSize()">+ Add</button>
+        </div>
+        <div id="sizeList" class="size-list">
+            </div>
+    </div>
+
+    <div class="form-group">
+        <label for="fileInput">Upload Images</label>
+        <input type="file" id="fileInput" multiple accept="image/*">
+    </div>
+
+    <button id="processBtn" class="btn-process" onclick="processImages()">Process & Download Zip</button>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    // Default sizes initialized here
+    let targetSizes = [
+        { w: 1250, h: 600 },
+        { w: 400, h: 250 },
+        { w: 1200, h: 630 }
+    ];
+
+    // --- UI FUNCTIONS ---
+    
+    // Render the list of sizes (badges)
+    function renderSizes() {
+        const list = document.getElementById('sizeList');
+        list.innerHTML = '';
+        
+        targetSizes.forEach((size, index) => {
+            const tag = document.createElement('div');
+            tag.className = 'size-tag';
+            tag.innerHTML = `
+                ${size.w} x ${size.h}
+                <span class="size-remove" onclick="removeSize(${index})">&times;</span>
+            `;
+            list.appendChild(tag);
+        });
+    }
+
+    // Add a new size from inputs
+    function addSize() {
+        const wInput = document.getElementById('newWidth');
+        const hInput = document.getElementById('newHeight');
+        
+        const w = parseInt(wInput.value);
+        const h = parseInt(hInput.value);
+
+        if (!w || !h || w <= 0 || h <= 0) {
+            alert("Please enter valid positive numbers for Width and Height.");
+            return;
+        }
+
+        targetSizes.push({ w, h });
+        renderSizes();
+        
+        // Clear inputs
+        wInput.value = '';
+        hInput.value = '';
+        wInput.focus();
+    }
+
+    // Remove a size by index
+    function removeSize(index) {
+        targetSizes.splice(index, 1);
+        renderSizes();
+    }
+
+    // Initialize UI on load
+    window.onload = function() {
+        renderSizes();
+    };
+
+
+    // --- PROCESSING LOGIC ---
+
+    const log = (msg, isError = false) => {
+        const statusDiv = document.getElementById('status');
+        statusDiv.style.display = 'block';
+        const line = document.createElement('div');
+        line.textContent = msg;
+        if (isError) line.className = 'error';
+        statusDiv.appendChild(line);
+        statusDiv.scrollTop = statusDiv.scrollHeight; // Auto scroll to bottom
+    };
+
+    const clearLog = () => {
+        document.getElementById('status').innerHTML = '';
+        document.getElementById('status').style.display = 'none';
+    };
+
+    async function processImages() {
+        const fileInput = document.getElementById('fileInput');
+        const baseNameInput = document.getElementById('baseName');
+        const trimPercentInput = document.getElementById('trimPercent');
+        const btn = document.getElementById('processBtn');
+
+        // Validation
+        if (fileInput.files.length === 0) {
+            alert("Please select images first.");
+            return;
+        }
+        if (targetSizes.length === 0) {
+            alert("Please add at least one target size.");
+            return;
+        }
+
+        const baseName = baseNameInput.value.trim() || "Image";
+        const trimPercent = parseFloat(trimPercentInput.value) / 100;
+
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+        clearLog();
+        log("Starting process...");
+
+        const zip = new JSZip();
+        let totalFiles = fileInput.files.length;
+        let processedCount = 0;
+
+        try {
+            for (let i = 0; i < totalFiles; i++) {
+                const file = fileInput.files[i];
+                log(`Processing: ${file.name}...`);
+
+                // Load Image
+                const imgBitmap = await createImageBitmap(file);
+                
+                // Calculate Dimensions
+                const originalW = imgBitmap.width;
+                const originalH = imgBitmap.height;
+                
+                // Calculate Trim Amount (Watermark logic)
+                const trimAmount = Math.floor(originalH * trimPercent);
+                const effectiveH = originalH - trimAmount; 
+
+                // Process each target size in the dynamic list
+                for (const size of targetSizes) {
+                    const blob = await cropCenter(imgBitmap, originalW, effectiveH, size.w, size.h);
+                    
+                    // Naming Convention
+                    let fileName = "";
+                    if (totalFiles > 1) {
+                        fileName = `${baseName}_${i + 1}_${size.w}x${size.h}.jpg`;
+                    } else {
+                        fileName = `${baseName}_${size.w}x${size.h}.jpg`;
+                    }
+
+                    // Add to Zip
+                    zip.file(fileName, blob);
+                }
+                
+                log(`Finished ${file.name} (Trimmed ${trimAmount}px from bottom)`);
+                processedCount++;
+            }
+
+            log("\nZipping files...");
+            const content = await zip.generateAsync({ type: "blob" });
+            
+            // Trigger Download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `${baseName}_Crops.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            log("Download initiated!", false);
+            const successMsg = document.createElement('div');
+            successMsg.className = 'success';
+            successMsg.style.fontWeight = 'bold';
+            successMsg.textContent = "All Done.";
+            document.getElementById('status').appendChild(successMsg);
+
+        } catch (error) {
+            console.error(error);
+            log(`Error: ${error.message}`, true);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Process & Download Zip";
+        }
+    }
+
+    // Core Logic: Center Crop with Trim support
+    function cropCenter(imgSource, srcW, srcH, targetW, targetH) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+
+            // High quality smoothing
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            // Aspect Ratios
+            const srcRatio = srcW / srcH;
+            const dstRatio = targetW / targetH;
+
+            let renderW, renderH;
+
+            // Resize Logic
+            if (srcRatio > dstRatio) {
+                // Source is wider: resize based on height
+                renderH = targetH;
+                renderW = renderH * srcRatio;
+            } else {
+                // Source is taller: resize based on width
+                renderW = targetW;
+                renderH = renderW / srcRatio;
+            }
+
+            // Center Coordinates
+            const xOffset = (targetW - renderW) / 2;
+            const yOffset = (targetH - renderH) / 2;
+
+            // Draw with trim logic (using srcH as the effective height)
+            ctx.drawImage(
+                imgSource, 
+                0, 0, srcW, srcH, 
+                xOffset, yOffset, renderW, renderH
+            );
+
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/jpeg', 0.95);
+        });
+    }
+</script>
+
+</body>
+</html>
