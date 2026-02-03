@@ -3,39 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batch Image Cropper (Custom Sizes)</title>
+    <title>Batch Image Cropper (Google Style)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 650px; }
-        h1 { margin-top: 0; color: #333; font-size: 24px; text-align: center; }
+        /* Google Palette Variables */
+        :root {
+            --google-blue: #4285F4;
+            --google-red: #EA4335;
+            --google-yellow: #FBBC05;
+            --google-green: #34A853;
+            --google-grey: #f1f3f4;
+            --text-dark: #202124;
+            --text-grey: #5f6368;
+        }
+
+        body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--google-grey); padding: 40px 20px; display: flex; justify-content: center; color: var(--text-dark); }
+        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15); width: 100%; max-width: 800px; }
+        
+        h1 { margin-top: 0; color: var(--text-dark); font-size: 28px; text-align: center; font-weight: 400; margin-bottom: 30px; }
         
         /* Form Elements */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        input[type="file"] { width: 100%; padding: 10px; background: #f9f9f9; border: 2px dashed #ccc; border-radius: 6px; text-align: center; cursor: pointer; }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-dark); font-size: 14px; }
+        .sub-label { font-size: 12px; color: var(--text-grey); margin-bottom: 8px; margin-top: -4px; }
         
-        /* Size Manager Styles */
-        .size-input-wrapper { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
-        .size-input-group { flex: 1; }
-        .btn-add { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 42px; }
-        .btn-add:hover { background-color: #218838; }
+        input[type="text"], input[type="number"] { 
+            width: 100%; padding: 12px; 
+            border: 1px solid #dadce0; border-radius: 4px; 
+            box-sizing: border-box; font-size: 14px; color: var(--text-dark); 
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus { border: 2px solid var(--google-blue); padding: 11px; outline: none; }
         
-        .size-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px; min-height: 40px; border: 1px solid #eee; }
-        .size-tag { background: #e2e6ea; padding: 5px 12px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; color: #333; font-weight: 500; }
-        .size-remove { color: #dc3545; cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; }
-        .size-remove:hover { color: #bd2130; }
+        input[type="file"] { 
+            width: 100%; padding: 20px; 
+            background: #f8f9fa; border: 2px dashed #dadce0; 
+            border-radius: 6px; text-align: center; cursor: pointer; color: var(--text-grey);
+        }
+        input[type="file"]:hover { background: #f1f3f4; border-color: var(--text-grey); }
 
-        /* Main Action Button */
-        .btn-process { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-process:hover { background-color: #0056b3; }
-        .btn-process:disabled { background-color: #ccc; cursor: not-allowed; }
+        /* Buttons */
+        button { font-family: 'Roboto', sans-serif; cursor: pointer; border: none; }
+        
+        .btn-add { 
+            background-color: white; color: var(--google-blue); 
+            border: 1px solid #dadce0; padding: 0 24px; border-radius: 4px; 
+            font-weight: 500; height: 42px; transition: all 0.2s;
+        }
+        .btn-add:hover { background-color: #f1f8ff; border-color: var(--google-blue); }
+
+        .btn-process { 
+            width: 100%; padding: 12px; 
+            background-color: var(--google-blue); color: white; 
+            border-radius: 4px; font-size: 14px; font-weight: 500; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-top: 10px; letter-spacing: 0.25px; 
+        }
+        .btn-process:hover { background-color: #3367d6; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .btn-process:disabled { background-color: #dadce0; color: #fff; cursor: not-allowed; box-shadow: none; }
+
+        /* Size Manager */
+        .size-input-wrapper { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
+        .size-input-group { flex: 1; }
+        
+        .size-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; min-height: 40px; }
+        .size-tag { 
+            padding: 6px 16px; border-radius: 18px; font-size: 14px; 
+            display: flex; align-items: center; gap: 8px; color: white; 
+            font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.15); 
+        }
+        .size-remove { 
+            color: white; cursor: pointer; font-weight: bold; font-size: 18px; 
+            line-height: 1; margin-left: 4px; opacity: 0.9; 
+        }
+        .size-remove:hover { opacity: 1; }
+
+        /* Preview Canvas */
+        #previewContainer { text-align: center; margin-top: 24px; display: none; background: #fff; border: 1px solid #dadce0; padding: 16px; border-radius: 8px;}
+        canvas { max-width: 100%; height: auto; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #eee; }
+        .preview-label { font-size: 16px; color: var(--text-dark); margin-bottom: 16px; font-weight: 500; }
+        .preview-legend { font-size: 13px; color: var(--text-grey); margin-bottom: 16px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;}
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
         /* Logs */
-        #status { margin-top: 20px; padding: 10px; background: #eef; border-radius: 6px; font-size: 14px; color: #333; display: none; white-space: pre-line; max-height: 300px; overflow-y: auto; }
-        .success { color: green; }
-        .error { color: red; }
+        #status { margin-top: 20px; padding: 12px; background: #f1f3f4; border-radius: 4px; font-size: 13px; color: var(--text-dark); display: none; white-space: pre-line; max-height: 200px; overflow-y: auto; font-family: monospace; border-left: 4px solid var(--text-grey); }
+        .success { color: var(--google-green); font-weight: bold; }
+        .error { color: var(--google-red); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -50,28 +104,33 @@
 
     <div class="form-group">
         <label for="trimPercent">Bottom Trim Percentage (%)</label>
-        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Removes this % from the bottom (e.g. 10 for watermark removal)</div>
-        <input type="number" id="trimPercent" value="10" min="0" max="50">
+        <div class="sub-label">Removes this % from the bottom (e.g., for watermark removal)</div>
+        <input type="number" id="trimPercent" value="10" min="0" max="50" oninput="updatePreview()">
     </div>
 
     <div class="form-group">
         <label>Target Sizes (Width x Height)</label>
         <div class="size-input-wrapper">
             <div class="size-input-group">
-                <input type="number" id="newWidth" placeholder="Width (px)">
+                <input type="number" id="newWidth" placeholder="Width">
             </div>
             <div class="size-input-group">
-                <input type="number" id="newHeight" placeholder="Height (px)">
+                <input type="number" id="newHeight" placeholder="Height">
             </div>
-            <button class="btn-add" onclick="addSize()">+ Add</button>
+            <button class="btn-add" onclick="addSize()">Add Size</button>
         </div>
-        <div id="sizeList" class="size-list">
-            </div>
+        <div id="sizeList" class="size-list"></div>
     </div>
 
     <div class="form-group">
         <label for="fileInput">Upload Images</label>
-        <input type="file" id="fileInput" multiple accept="image/*">
+        <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect()">
+        
+        <div id="previewContainer">
+            <div class="preview-label">Visual Preview</div>
+            <div id="previewLegend" class="preview-legend"></div>
+            <canvas id="previewCanvas"></canvas>
+        </div>
     </div>
 
     <button id="processBtn" class="btn-process" onclick="processImages()">Process & Download Zip</button>
@@ -81,67 +140,219 @@
 
 <script>
     // --- STATE MANAGEMENT ---
-    // Default sizes initialized here
+    const STORAGE_KEY_SIZES = 'bic_target_sizes_v2';
+    const STORAGE_KEY_TRIM = 'bic_trim_percent_v2';
+
+    // Google Brand Colors for Crop Boxes
+    // Skipping Red because it is used for the "Trim Area"
+    const PALETTE = [
+        '#4285F4', // Blue
+        '#34A853', // Green
+        '#FBBC05', // Yellow (Darkened slightly for visibility in code logic if needed, but keeping pure here)
+        '#A142F4', // Purple (Forms)
+        '#188038', // Darker Green
+        '#d93025'  // Darker Red (only if we wrap around, but generally avoiding red)
+    ];
+
     let targetSizes = [
         { w: 1250, h: 600 },
         { w: 400, h: 250 },
         { w: 1200, h: 630 }
     ];
+    
+    let previewImageBitmap = null; 
+
+    // Helper: Cycle through Google colors
+    function getColor(index) {
+        return PALETTE[index % PALETTE.length];
+    }
+
+    // --- PERSISTENCE & INIT ---
+    
+    window.onload = function() {
+        loadSettings();
+        renderSizes();
+    };
+
+    function loadSettings() {
+        const savedSizes = localStorage.getItem(STORAGE_KEY_SIZES);
+        if (savedSizes) {
+            try { targetSizes = JSON.parse(savedSizes); } catch (e) { console.error("Error parsing saved sizes"); }
+        }
+        const savedTrim = localStorage.getItem(STORAGE_KEY_TRIM);
+        if (savedTrim) document.getElementById('trimPercent').value = savedTrim;
+    }
+
+    function saveSettings() {
+        localStorage.setItem(STORAGE_KEY_SIZES, JSON.stringify(targetSizes));
+        localStorage.setItem(STORAGE_KEY_TRIM, document.getElementById('trimPercent').value);
+    }
 
     // --- UI FUNCTIONS ---
     
-    // Render the list of sizes (badges)
     function renderSizes() {
         const list = document.getElementById('sizeList');
         list.innerHTML = '';
         
         targetSizes.forEach((size, index) => {
+            const color = getColor(index);
             const tag = document.createElement('div');
             tag.className = 'size-tag';
+            // Apply color
+            tag.style.backgroundColor = color;
+            
+            // If Yellow, use dark text, else white
+            if (color === '#FBBC05') {
+                tag.style.color = '#333';
+                tag.querySelector('.size-remove').style.color = '#333'; // Logic applied after innerHTML
+            }
+
             tag.innerHTML = `
                 ${size.w} x ${size.h}
-                <span class="size-remove" onclick="removeSize(${index})">&times;</span>
+                <span class="size-remove" onclick="removeSize(${index})" style="${color === '#FBBC05' ? 'color:#333' : ''}">&times;</span>
             `;
             list.appendChild(tag);
         });
+        updatePreview();
     }
 
-    // Add a new size from inputs
     function addSize() {
         const wInput = document.getElementById('newWidth');
         const hInput = document.getElementById('newHeight');
-        
         const w = parseInt(wInput.value);
         const h = parseInt(hInput.value);
 
         if (!w || !h || w <= 0 || h <= 0) {
-            alert("Please enter valid positive numbers for Width and Height.");
+            alert("Please enter valid positive numbers.");
             return;
         }
 
         targetSizes.push({ w, h });
+        saveSettings();
         renderSizes();
         
-        // Clear inputs
         wInput.value = '';
         hInput.value = '';
         wInput.focus();
     }
 
-    // Remove a size by index
     function removeSize(index) {
         targetSizes.splice(index, 1);
+        saveSettings();
         renderSizes();
     }
 
-    // Initialize UI on load
-    window.onload = function() {
-        renderSizes();
-    };
+    // --- PREVIEW LOGIC ---
 
+    async function handleFileSelect() {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files && fileInput.files[0]) {
+            previewImageBitmap = await createImageBitmap(fileInput.files[0]);
+            document.getElementById('previewContainer').style.display = 'block';
+            updatePreview();
+        }
+    }
 
-    // --- PROCESSING LOGIC ---
+    function updatePreview() {
+        saveSettings();
+        if (!previewImageBitmap) return;
 
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const trimPercentInput = document.getElementById('trimPercent');
+        const trimPercent = parseFloat(trimPercentInput.value) || 0;
+
+        // Scale setup
+        const MAX_WIDTH = 700;
+        let scale = 1;
+        if (previewImageBitmap.width > MAX_WIDTH) {
+            scale = MAX_WIDTH / previewImageBitmap.width;
+        }
+        canvas.width = previewImageBitmap.width * scale;
+        canvas.height = previewImageBitmap.height * scale;
+
+        // Draw Image
+        ctx.drawImage(previewImageBitmap, 0, 0, canvas.width, canvas.height);
+
+        // Calculate Trim
+        const originalW = previewImageBitmap.width;
+        const originalH = previewImageBitmap.height;
+        const trimHeightPx = Math.floor(originalH * (trimPercent / 100));
+        const effectiveH = originalH - trimHeightPx;
+
+        // Draw Trim Overlay (Google Red)
+        const scaledTrimHeight = trimHeightPx * scale;
+        const scaledTrimYPos = canvas.height - scaledTrimHeight;
+        
+        if (scaledTrimHeight > 0) {
+            ctx.fillStyle = "rgba(234, 67, 53, 0.3)"; // #EA4335 with opacity
+            ctx.fillRect(0, scaledTrimYPos, canvas.width, scaledTrimHeight);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, scaledTrimYPos);
+            ctx.lineTo(canvas.width, scaledTrimYPos);
+            ctx.strokeStyle = "#EA4335";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Legend Setup
+        const legendContainer = document.getElementById('previewLegend');
+        legendContainer.innerHTML = '<div class="legend-item"><span class="legend-color" style="background:rgba(234, 67, 53, 0.6)"></span> Trimmed Area</div>';
+
+        // Draw Crop Boxes
+        targetSizes.forEach((size, index) => {
+            const color = getColor(index);
+
+            // Math logic
+            const srcRatio = originalW / effectiveH;
+            const dstRatio = size.w / size.h;
+            let cropBoxWInSrc, cropBoxHInSrc;
+
+            if (srcRatio > dstRatio) {
+                cropBoxHInSrc = effectiveH;
+                cropBoxWInSrc = cropBoxHInSrc * dstRatio;
+            } else {
+                cropBoxWInSrc = originalW;
+                cropBoxHInSrc = cropBoxWInSrc / dstRatio;
+            }
+
+            const cropXInSrc = (originalW - cropBoxWInSrc) / 2;
+            const cropYInSrc = (effectiveH - cropBoxHInSrc) / 2;
+
+            const cx = cropXInSrc * scale;
+            const cy = cropYInSrc * scale;
+            const cw = cropBoxWInSrc * scale;
+            const ch = cropBoxHInSrc * scale;
+
+            // Draw Box
+            ctx.beginPath();
+            ctx.rect(cx, cy, cw, ch);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 4]);
+            
+            // Add shadow for visibility on white images (especially for yellow)
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 2;
+            
+            ctx.stroke();
+            
+            // Reset
+            ctx.setLineDash([]);
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+
+            // Legend
+            legendContainer.innerHTML += `
+                <div class="legend-item">
+                    <span class="legend-color" style="background:${color}; border:1px solid #ddd"></span> ${size.w}x${size.h}
+                </div>
+            `;
+        });
+    }
+
+    // --- PROCESSING LOGIC (Identical to before) ---
     const log = (msg, isError = false) => {
         const statusDiv = document.getElementById('status');
         statusDiv.style.display = 'block';
@@ -149,9 +360,8 @@
         line.textContent = msg;
         if (isError) line.className = 'error';
         statusDiv.appendChild(line);
-        statusDiv.scrollTop = statusDiv.scrollHeight; // Auto scroll to bottom
+        statusDiv.scrollTop = statusDiv.scrollHeight;
     };
-
     const clearLog = () => {
         document.getElementById('status').innerHTML = '';
         document.getElementById('status').style.display = 'none';
@@ -163,15 +373,8 @@
         const trimPercentInput = document.getElementById('trimPercent');
         const btn = document.getElementById('processBtn');
 
-        // Validation
-        if (fileInput.files.length === 0) {
-            alert("Please select images first.");
-            return;
-        }
-        if (targetSizes.length === 0) {
-            alert("Please add at least one target size.");
-            return;
-        }
+        if (fileInput.files.length === 0) { alert("Please select images first."); return; }
+        if (targetSizes.length === 0) { alert("Please add at least one target size."); return; }
 
         const baseName = baseNameInput.value.trim() || "Image";
         const trimPercent = parseFloat(trimPercentInput.value) / 100;
@@ -183,48 +386,34 @@
 
         const zip = new JSZip();
         let totalFiles = fileInput.files.length;
-        let processedCount = 0;
 
         try {
             for (let i = 0; i < totalFiles; i++) {
                 const file = fileInput.files[i];
                 log(`Processing: ${file.name}...`);
 
-                // Load Image
                 const imgBitmap = await createImageBitmap(file);
-                
-                // Calculate Dimensions
                 const originalW = imgBitmap.width;
                 const originalH = imgBitmap.height;
-                
-                // Calculate Trim Amount (Watermark logic)
                 const trimAmount = Math.floor(originalH * trimPercent);
                 const effectiveH = originalH - trimAmount; 
 
-                // Process each target size in the dynamic list
                 for (const size of targetSizes) {
                     const blob = await cropCenter(imgBitmap, originalW, effectiveH, size.w, size.h);
                     
-                    // Naming Convention
                     let fileName = "";
                     if (totalFiles > 1) {
                         fileName = `${baseName}_${i + 1}_${size.w}x${size.h}.jpg`;
                     } else {
                         fileName = `${baseName}_${size.w}x${size.h}.jpg`;
                     }
-
-                    // Add to Zip
                     zip.file(fileName, blob);
                 }
-                
-                log(`Finished ${file.name} (Trimmed ${trimAmount}px from bottom)`);
-                processedCount++;
+                log(`Finished ${file.name}`);
             }
 
             log("\nZipping files...");
             const content = await zip.generateAsync({ type: "blob" });
-            
-            // Trigger Download
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
             link.download = `${baseName}_Crops.zip`;
@@ -235,7 +424,6 @@
             log("Download initiated!", false);
             const successMsg = document.createElement('div');
             successMsg.className = 'success';
-            successMsg.style.fontWeight = 'bold';
             successMsg.textContent = "All Done.";
             document.getElementById('status').appendChild(successMsg);
 
@@ -248,45 +436,31 @@
         }
     }
 
-    // Core Logic: Center Crop with Trim support
     function cropCenter(imgSource, srcW, srcH, targetW, targetH) {
         return new Promise((resolve) => {
             const canvas = document.createElement('canvas');
             canvas.width = targetW;
             canvas.height = targetH;
             const ctx = canvas.getContext('2d');
-
-            // High quality smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
 
-            // Aspect Ratios
             const srcRatio = srcW / srcH;
             const dstRatio = targetW / targetH;
-
             let renderW, renderH;
 
-            // Resize Logic
             if (srcRatio > dstRatio) {
-                // Source is wider: resize based on height
                 renderH = targetH;
                 renderW = renderH * srcRatio;
             } else {
-                // Source is taller: resize based on width
                 renderW = targetW;
                 renderH = renderW / srcRatio;
             }
 
-            // Center Coordinates
             const xOffset = (targetW - renderW) / 2;
             const yOffset = (targetH - renderH) / 2;
 
-            // Draw with trim logic (using srcH as the effective height)
-            ctx.drawImage(
-                imgSource, 
-                0, 0, srcW, srcH, 
-                xOffset, yOffset, renderW, renderH
-            );
+            ctx.drawImage(imgSource, 0, 0, srcW, srcH, xOffset, yOffset, renderW, renderH);
 
             canvas.toBlob((blob) => {
                 resolve(blob);
@@ -294,6 +468,5 @@
         });
     }
 </script>
-
 </body>
 </html>
