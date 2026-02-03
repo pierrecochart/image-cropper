@@ -7,168 +7,299 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Google Palette Variables */
+        /* --- RESET & VARIABLES --- */
         :root {
             --google-blue: #4285F4;
+            --google-blue-hover: #3367d6;
             --google-red: #EA4335;
             --google-yellow: #FBBC05;
             --google-green: #34A853;
             --google-grey: #f1f3f4;
             --text-dark: #202124;
             --text-grey: #5f6368;
+            --border-color: #dadce0;
         }
 
-        body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--google-grey); padding: 40px 20px; display: flex; justify-content: center; color: var(--text-dark); }
-        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15); width: 100%; max-width: 800px; }
-        
-        h1 { margin-top: 0; color: var(--text-dark); font-size: 28px; text-align: center; font-weight: 400; margin-bottom: 30px; }
-        
-        /* Form Elements */
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Roboto', -apple-system, sans-serif; 
+            background: var(--google-grey); 
+            padding: 20px; 
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* --- LAYOUT GRID --- */
+        .main-wrapper {
+            display: flex;
+            flex-direction: row; 
+            gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .instructions-container {
+            flex: 1;
+            background: transparent;
+            padding: 10px;
+            min-width: 250px;
+        }
+
+        .instructions-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        .tool-container { 
+            flex: 2;
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15); 
+            width: 100%;
+        }
+
+        h1 { margin-top: 0; color: var(--text-dark); font-size: 24px; font-weight: 400; margin-bottom: 25px; }
+        h2 { font-size: 18px; margin-top: 0; color: var(--google-blue); }
+        p, li { font-size: 14px; line-height: 1.5; color: var(--text-grey); }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+
+        /* --- FORM ELEMENTS --- */
         .form-group { margin-bottom: 24px; }
         label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-dark); font-size: 14px; }
         .sub-label { font-size: 12px; color: var(--text-grey); margin-bottom: 8px; margin-top: -4px; }
         
-        input[type="text"], input[type="number"] { 
-            width: 100%; padding: 12px; 
-            border: 1px solid #dadce0; border-radius: 4px; 
-            box-sizing: border-box; font-size: 14px; color: var(--text-dark); 
-            transition: border 0.2s;
+        /* Unified input styling */
+        input[type="text"], input[type="number"], select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            font-size: 14px; 
+            color: var(--text-dark); 
+            transition: all 0.2s;
+            height: 44px; /* Fixed Height for consistency */
+            margin: 0;
+            background: white;
         }
-        input[type="text"]:focus, input[type="number"]:focus { border: 2px solid var(--google-blue); padding: 11px; outline: none; }
+
+        /* FIX FOR TWITCHING: 
+           Instead of changing border-width (which moves layout), 
+           we use box-shadow to fake the thickness.
+        */
+        input:focus, select:focus { 
+            border-color: var(--google-blue);
+            box-shadow: 0 0 0 1px var(--google-blue); 
+            outline: none; 
+            padding: 10px 12px; /* Padding stays exactly the same */
+        }
         
         input[type="file"] { 
-            width: 100%; padding: 20px; 
-            background: #f8f9fa; border: 2px dashed #dadce0; 
+            width: 100%; padding: 20px; height: auto;
+            background: #f8f9fa; border: 2px dashed var(--border-color); 
             border-radius: 6px; text-align: center; cursor: pointer; color: var(--text-grey);
         }
-        input[type="file"]:hover { background: #f1f3f4; border-color: var(--text-grey); }
+        input[type="file"]:hover { background: #e8f0fe; border-color: var(--google-blue); }
 
-        /* Buttons */
+        /* --- BUTTONS --- */
         button { font-family: 'Roboto', sans-serif; cursor: pointer; border: none; }
         
         .btn-add { 
-            background-color: white; color: var(--google-blue); 
-            border: 1px solid #dadce0; padding: 0 24px; border-radius: 4px; 
-            font-weight: 500; height: 42px; transition: all 0.2s;
+            background-color: var(--google-blue); 
+            color: white; 
+            border: none; 
+            padding: 0 20px; 
+            border-radius: 4px; 
+            font-weight: 500; 
+            height: 44px; /* Matches Input Height Exactly */
+            transition: background 0.2s;
+            white-space: nowrap;
         }
-        .btn-add:hover { background-color: #f1f8ff; border-color: var(--google-blue); }
+        .btn-add:hover { background-color: var(--google-blue-hover); }
 
         .btn-process { 
-            width: 100%; padding: 12px; 
+            width: 100%; padding: 14px; 
             background-color: var(--google-blue); color: white; 
-            border-radius: 4px; font-size: 14px; font-weight: 500; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-top: 10px; letter-spacing: 0.25px; 
+            border-radius: 4px; font-size: 16px; font-weight: 500; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-top: 10px; letter-spacing: 0.5px; 
         }
-        .btn-process:hover { background-color: #3367d6; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-        .btn-process:disabled { background-color: #dadce0; color: #fff; cursor: not-allowed; box-shadow: none; }
+        .btn-process:hover { background-color: var(--google-blue-hover); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .btn-process:disabled { background-color: var(--border-color); color: #fff; cursor: not-allowed; box-shadow: none; }
 
-        /* Size Manager */
-        .size-input-wrapper { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
+        /* --- SIZE MANAGER --- */
+        .size-input-wrapper { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 12px; 
+            align-items: center; /* Changed from flex-end to center for stability */
+        }
         .size-input-group { flex: 1; }
+        .unit-select { flex: 0 0 70px; } 
         
-        .size-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; min-height: 40px; }
+        .size-list { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin-top: 16px; 
+            width: 100%;
+        }
+        
         .size-tag { 
-            padding: 6px 16px; border-radius: 18px; font-size: 14px; 
-            display: flex; align-items: center; gap: 8px; color: white; 
+            padding: 6px 14px; border-radius: 18px; font-size: 13px; 
+            display: inline-flex; align-items: center; gap: 8px; color: white; 
             font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.15); 
+            white-space: nowrap; 
         }
         .size-remove { 
-            color: white; cursor: pointer; font-weight: bold; font-size: 18px; 
-            line-height: 1; margin-left: 4px; opacity: 0.9; 
+            cursor: pointer; font-weight: bold; font-size: 16px; 
+            line-height: 1; margin-left: 2px; opacity: 0.8; 
         }
         .size-remove:hover { opacity: 1; }
 
-        /* Preview Canvas */
-        #previewContainer { text-align: center; margin-top: 24px; display: none; background: #fff; border: 1px solid #dadce0; padding: 16px; border-radius: 8px;}
+        /* --- PREVIEW CANVAS --- */
+        #previewContainer { text-align: center; margin-top: 24px; display: none; background: #fff; border: 1px solid var(--border-color); padding: 16px; border-radius: 8px;}
         canvas { max-width: 100%; height: auto; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #eee; }
         .preview-label { font-size: 16px; color: var(--text-dark); margin-bottom: 16px; font-weight: 500; }
-        .preview-legend { font-size: 13px; color: var(--text-grey); margin-bottom: 16px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;}
+        .preview-legend { font-size: 13px; color: var(--text-grey); margin-bottom: 16px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
-        /* Logs */
-        #status { margin-top: 20px; padding: 12px; background: #f1f3f4; border-radius: 4px; font-size: 13px; color: var(--text-dark); display: none; white-space: pre-line; max-height: 200px; overflow-y: auto; font-family: monospace; border-left: 4px solid var(--text-grey); }
+        /* --- LOGS --- */
+        #status { margin-top: 20px; padding: 12px; background: var(--google-grey); border-radius: 4px; font-size: 13px; color: var(--text-dark); display: none; white-space: pre-line; max-height: 200px; overflow-y: auto; font-family: monospace; border-left: 4px solid var(--text-grey); }
         .success { color: var(--google-green); font-weight: bold; }
         .error { color: var(--google-red); font-weight: bold; }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            .main-wrapper {
+                flex-direction: column; 
+                padding: 0;
+            }
+            .instructions-container {
+                width: 100%;
+                order: -1; 
+                margin-bottom: 0;
+            }
+            .tool-container {
+                width: 100%;
+                padding: 20px;
+            }
+            .size-input-wrapper { flex-wrap: wrap; }
+            .size-input-group { min-width: 45%; }
+            .unit-select { flex-grow: 1; }
+            .btn-add { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Image Cropper & Resizer</h1>
+<div class="main-wrapper">
     
-    <div class="form-group">
-        <label for="baseName">Base Name</label>
-        <input type="text" id="baseName" value="CampaignV1" placeholder="e.g. CampaignV1">
-    </div>
-
-    <div class="form-group">
-        <label for="trimPercent">Bottom Trim Percentage (%)</label>
-        <div class="sub-label">Removes this % from the bottom (e.g., for watermark removal)</div>
-        <input type="number" id="trimPercent" value="10" min="0" max="50" oninput="updatePreview()">
-    </div>
-
-    <div class="form-group">
-        <label>Target Sizes (Width x Height)</label>
-        <div class="size-input-wrapper">
-            <div class="size-input-group">
-                <input type="number" id="newWidth" placeholder="Width">
-            </div>
-            <div class="size-input-group">
-                <input type="number" id="newHeight" placeholder="Height">
-            </div>
-            <button class="btn-add" onclick="addSize()">Add Size</button>
+    <div class="instructions-container">
+        <div class="instructions-content">
+            <h2>How to Use</h2>
+            <ul>
+                <li><strong>Upload:</strong> Select one or multiple images from your device.</li>
+                <li><strong>Trim:</strong> Set a percentage to cut off the bottom (great for removing watermarks). The red area in the preview shows what will be gone.</li>
+                <li><strong>Add Sizes:</strong> Enter width and height, choose your unit (px, cm, inch), and click Add. </li>
+                <li><strong>Process:</strong> Click the button to crop all images to all sizes instantly.</li>
+                <li><strong>Download:</strong> A ZIP file containing all your cropped variations will download automatically.</li>
+            </ul>
+            <p style="font-size:12px; margin-top:15px; font-style:italic;">*Note: Non-pixel units (cm, in) are converted assuming 96 DPI screen resolution.</p>
         </div>
-        <div id="sizeList" class="size-list"></div>
     </div>
 
-    <div class="form-group">
-        <label for="fileInput">Upload Images</label>
-        <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect()">
+    <div class="tool-container">
+        <h1>Batch Image Cropper</h1>
         
-        <div id="previewContainer">
-            <div class="preview-label">Visual Preview</div>
-            <div id="previewLegend" class="preview-legend"></div>
-            <canvas id="previewCanvas"></canvas>
+        <div class="form-group">
+            <label for="baseName">File Base Name</label>
+            <input type="text" id="baseName" value="CampaignV1" placeholder="e.g. CampaignV1">
         </div>
+
+        <div class="form-group">
+            <label for="trimPercent">Bottom Trim Percentage (%)</label>
+            <div class="sub-label">Removes this % from the bottom before cropping</div>
+            <input type="number" id="trimPercent" value="10" min="0" max="50" oninput="updatePreview()">
+        </div>
+
+        <div class="form-group">
+            <label>Target Sizes</label>
+            <div class="size-input-wrapper">
+                <div class="size-input-group">
+                    <input type="number" id="newWidth" placeholder="Width">
+                </div>
+                <div class="size-input-group">
+                    <input type="number" id="newHeight" placeholder="Height">
+                </div>
+                <select id="newUnit" class="unit-select">
+                    <option value="px">px</option>
+                    <option value="in">in</option>
+                    <option value="cm">cm</option>
+                    <option value="mm">mm</option>
+                </select>
+                <button class="btn-add" onclick="addSize()">+ Add</button>
+            </div>
+            <div id="sizeList" class="size-list"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="fileInput">Upload Images</label>
+            <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect()">
+            
+            <div id="previewContainer">
+                <div class="preview-label">Visual Preview</div>
+                <div id="previewLegend" class="preview-legend"></div>
+                <canvas id="previewCanvas"></canvas>
+            </div>
+        </div>
+
+        <button id="processBtn" class="btn-process" onclick="processImages()">Process & Download Zip</button>
+
+        <div id="status"></div>
     </div>
-
-    <button id="processBtn" class="btn-process" onclick="processImages()">Process & Download Zip</button>
-
-    <div id="status"></div>
 </div>
 
 <script>
     // --- STATE MANAGEMENT ---
-    const STORAGE_KEY_SIZES = 'bic_target_sizes_v2';
-    const STORAGE_KEY_TRIM = 'bic_trim_percent_v2';
+    const STORAGE_KEY_SIZES = 'bic_target_sizes_v3';
+    const STORAGE_KEY_TRIM = 'bic_trim_percent_v3';
 
-    // Google Brand Colors for Crop Boxes
-    // Skipping Red because it is used for the "Trim Area"
+    // Unit Conversion Factors (to pixels, assuming 96 DPI)
+    const UNIT_TO_PX = {
+        'px': 1,
+        'in': 96,
+        'cm': 37.795,
+        'mm': 3.7795
+    };
+
     const PALETTE = [
         '#4285F4', // Blue
         '#34A853', // Green
-        '#FBBC05', // Yellow (Darkened slightly for visibility in code logic if needed, but keeping pure here)
-        '#A142F4', // Purple (Forms)
-        '#188038', // Darker Green
-        '#d93025'  // Darker Red (only if we wrap around, but generally avoiding red)
+        '#FBBC05', // Yellow
+        '#A142F4', // Purple
+        '#188038', // Dark Green
+        '#d93025'  // Dark Red
     ];
 
     let targetSizes = [
-        { w: 1250, h: 600 },
-        { w: 400, h: 250 },
-        { w: 1200, h: 630 }
+        { w: 1250, h: 600, unit: 'px' },
+        { w: 400, h: 250, unit: 'px' },
+        { w: 1200, h: 630, unit: 'px' }
     ];
     
     let previewImageBitmap = null; 
 
-    // Helper: Cycle through Google colors
     function getColor(index) {
         return PALETTE[index % PALETTE.length];
     }
 
     // --- PERSISTENCE & INIT ---
-    
     window.onload = function() {
         loadSettings();
         renderSizes();
@@ -189,7 +320,6 @@
     }
 
     // --- UI FUNCTIONS ---
-    
     function renderSizes() {
         const list = document.getElementById('sizeList');
         list.innerHTML = '';
@@ -198,17 +328,19 @@
             const color = getColor(index);
             const tag = document.createElement('div');
             tag.className = 'size-tag';
-            // Apply color
             tag.style.backgroundColor = color;
             
-            // If Yellow, use dark text, else white
+            // Text color for readability
             if (color === '#FBBC05') {
                 tag.style.color = '#333';
-                tag.querySelector('.size-remove').style.color = '#333'; // Logic applied after innerHTML
+                tag.style.boxShadow = "inset 0 0 0 1px rgba(0,0,0,0.1)";
             }
 
+            // Display unit if not px, or just px
+            const unitDisplay = size.unit || 'px';
+
             tag.innerHTML = `
-                ${size.w} x ${size.h}
+                ${size.w} x ${size.h} ${unitDisplay}
                 <span class="size-remove" onclick="removeSize(${index})" style="${color === '#FBBC05' ? 'color:#333' : ''}">&times;</span>
             `;
             list.appendChild(tag);
@@ -219,15 +351,18 @@
     function addSize() {
         const wInput = document.getElementById('newWidth');
         const hInput = document.getElementById('newHeight');
-        const w = parseInt(wInput.value);
-        const h = parseInt(hInput.value);
+        const uInput = document.getElementById('newUnit');
+
+        const w = parseFloat(wInput.value);
+        const h = parseFloat(hInput.value);
+        const unit = uInput.value;
 
         if (!w || !h || w <= 0 || h <= 0) {
             alert("Please enter valid positive numbers.");
             return;
         }
 
-        targetSizes.push({ w, h });
+        targetSizes.push({ w, h, unit });
         saveSettings();
         renderSizes();
         
@@ -243,7 +378,6 @@
     }
 
     // --- PREVIEW LOGIC ---
-
     async function handleFileSelect() {
         const fileInput = document.getElementById('fileInput');
         if (fileInput.files && fileInput.files[0]) {
@@ -262,7 +396,6 @@
         const trimPercentInput = document.getElementById('trimPercent');
         const trimPercent = parseFloat(trimPercentInput.value) || 0;
 
-        // Scale setup
         const MAX_WIDTH = 700;
         let scale = 1;
         if (previewImageBitmap.width > MAX_WIDTH) {
@@ -271,42 +404,41 @@
         canvas.width = previewImageBitmap.width * scale;
         canvas.height = previewImageBitmap.height * scale;
 
-        // Draw Image
         ctx.drawImage(previewImageBitmap, 0, 0, canvas.width, canvas.height);
 
-        // Calculate Trim
         const originalW = previewImageBitmap.width;
         const originalH = previewImageBitmap.height;
         const trimHeightPx = Math.floor(originalH * (trimPercent / 100));
         const effectiveH = originalH - trimHeightPx;
 
-        // Draw Trim Overlay (Google Red)
+        // Draw Trim Overlay
         const scaledTrimHeight = trimHeightPx * scale;
         const scaledTrimYPos = canvas.height - scaledTrimHeight;
         
         if (scaledTrimHeight > 0) {
-            ctx.fillStyle = "rgba(234, 67, 53, 0.3)"; // #EA4335 with opacity
+            ctx.fillStyle = "rgba(234, 67, 53, 0.3)";
             ctx.fillRect(0, scaledTrimYPos, canvas.width, scaledTrimHeight);
-            
-            ctx.beginPath();
-            ctx.moveTo(0, scaledTrimYPos);
-            ctx.lineTo(canvas.width, scaledTrimYPos);
             ctx.strokeStyle = "#EA4335";
             ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.strokeRect(0, scaledTrimYPos, canvas.width, scaledTrimHeight);
         }
 
-        // Legend Setup
         const legendContainer = document.getElementById('previewLegend');
-        legendContainer.innerHTML = '<div class="legend-item"><span class="legend-color" style="background:rgba(234, 67, 53, 0.6)"></span> Trimmed Area</div>';
+        legendContainer.innerHTML = '<div class="legend-item"><span class="legend-color" style="background:rgba(234, 67, 53, 0.6)"></span> Trimmed</div>';
 
         // Draw Crop Boxes
         targetSizes.forEach((size, index) => {
             const color = getColor(index);
+            
+            // Convert Unit to Pixels for calculation
+            const factor = UNIT_TO_PX[size.unit || 'px'];
+            const targetPxW = size.w * factor;
+            const targetPxH = size.h * factor;
 
-            // Math logic
+            // Logic using pixel values
             const srcRatio = originalW / effectiveH;
-            const dstRatio = size.w / size.h;
+            const dstRatio = targetPxW / targetPxH;
+            
             let cropBoxWInSrc, cropBoxHInSrc;
 
             if (srcRatio > dstRatio) {
@@ -325,34 +457,26 @@
             const cw = cropBoxWInSrc * scale;
             const ch = cropBoxHInSrc * scale;
 
-            // Draw Box
             ctx.beginPath();
             ctx.rect(cx, cy, cw, ch);
             ctx.strokeStyle = color;
             ctx.lineWidth = 3;
             ctx.setLineDash([6, 4]);
-            
-            // Add shadow for visibility on white images (especially for yellow)
             ctx.shadowColor = "rgba(0,0,0,0.5)";
             ctx.shadowBlur = 2;
-            
             ctx.stroke();
-            
-            // Reset
             ctx.setLineDash([]);
             ctx.shadowColor = "transparent";
-            ctx.shadowBlur = 0;
 
-            // Legend
             legendContainer.innerHTML += `
                 <div class="legend-item">
-                    <span class="legend-color" style="background:${color}; border:1px solid #ddd"></span> ${size.w}x${size.h}
+                    <span class="legend-color" style="background:${color}; border:1px solid #ddd"></span> ${size.w}x${size.h}${size.unit||'px'}
                 </div>
             `;
         });
     }
 
-    // --- PROCESSING LOGIC (Identical to before) ---
+    // --- PROCESSING LOGIC ---
     const log = (msg, isError = false) => {
         const statusDiv = document.getElementById('status');
         statusDiv.style.display = 'block';
@@ -399,13 +523,20 @@
                 const effectiveH = originalH - trimAmount; 
 
                 for (const size of targetSizes) {
-                    const blob = await cropCenter(imgBitmap, originalW, effectiveH, size.w, size.h);
+                    // Unit Conversion for Processing
+                    const factor = UNIT_TO_PX[size.unit || 'px'];
+                    const targetPxW = Math.round(size.w * factor);
+                    const targetPxH = Math.round(size.h * factor);
+
+                    const blob = await cropCenter(imgBitmap, originalW, effectiveH, targetPxW, targetPxH);
                     
                     let fileName = "";
+                    let sizeLabel = `${size.w}x${size.h}${size.unit||'px'}`;
+                    
                     if (totalFiles > 1) {
-                        fileName = `${baseName}_${i + 1}_${size.w}x${size.h}.jpg`;
+                        fileName = `${baseName}_${i + 1}_${sizeLabel}.jpg`;
                     } else {
-                        fileName = `${baseName}_${size.w}x${size.h}.jpg`;
+                        fileName = `${baseName}_${sizeLabel}.jpg`;
                     }
                     zip.file(fileName, blob);
                 }
