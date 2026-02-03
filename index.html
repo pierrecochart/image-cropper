@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batch Image Cropper (Google Style)</title>
+    <title>Free Batch Image Cropper & Resizer | By Pierre Cochart</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -174,6 +174,10 @@
         .success { color: var(--google-green); font-weight: bold; }
         .error { color: var(--google-red); font-weight: bold; }
 
+        /* Donation Section Styles */
+        .donate-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
+        .donate-text { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; font-style: italic; }
+
         /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
             .main-wrapper {
@@ -211,11 +215,19 @@
                 <li><strong>Download:</strong> A ZIP file containing all your cropped variations will download automatically.</li>
             </ul>
             <p style="font-size:12px; margin-top:15px; font-style:italic;">*Note: Non-pixel units (cm, in) are converted assuming 96 DPI screen resolution.</p>
+            
+            <div class="donate-section">
+                <p class="donate-text">This batch cropper is entirely free to use. If it has saved you some time, please consider buying me a coffee to support future updates. Cheers!</p>
+                <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank">
+                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important; width: auto !important;" >
+                </a>
+            </div>
+
         </div>
     </div>
 
     <div class="tool-container">
-        <h1>Batch Image Cropper</h1>
+        <h1>Free Batch Image Cropper</h1>
         
         <div class="form-group">
             <label for="baseName">File Base Name</label>
@@ -599,5 +611,6 @@
         });
     }
 </script>
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#4285F4" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 </body>
 </html>
