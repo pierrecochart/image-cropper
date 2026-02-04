@@ -201,32 +201,6 @@
     </style>
 </head>
 <body>
-    <div id="global-nav-placeholder"></div>
-
-    <script>
-        // CHANGE THIS URL to point to the raw file in your Main Repo
-        const navUrl = 'https://PierreCochart.github.io/nav/global-nav.html';
-
-        fetch(navUrl)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('global-nav-placeholder').innerHTML = data;
-                
-                // Re-run the scripts inside the fetched HTML (browsers block them by default)
-                const scripts = document.getElementById('global-nav-placeholder').querySelectorAll("script");
-                scripts.forEach(oldScript => {
-                    const newScript = document.createElement("script");
-                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                    oldScript.parentNode.replaceChild(newScript, oldScript);
-                });
-            })
-            .catch(error => console.error('Error loading navbar:', error));
-    </script>
-
-    <div class="main-wrapper">
-        ...
-    </div>
 
 <div class="main-wrapper">
     
