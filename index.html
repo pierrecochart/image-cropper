@@ -1,5 +1,3 @@
----
----
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,36 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://pierrecochart.github.io/image-cropper/">
     <title>Free Batch Image Cropper & Resizer | By Pierre Cochart</title>
+    <meta name="description" content="Crop and resize multiple images in bulk, directly in your browser. Trim watermarks, set custom sizes in px/in/cm/mm, and export a ZIP — free, no uploads, no signup.">
+    <meta property="og:title" content="Free Batch Image Cropper & Resizer">
+    <meta property="og:description" content="Crop and resize multiple images in bulk, directly in your browser. No uploads, no signup, entirely free.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pierrecochart.github.io/image-cropper/">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        /* --- RESET & VARIABLES --- */
+        /* --- RESET & VARIABLES (Blueprint brand system) --- */
         :root {
-            --google-blue: #4285F4;
-            --google-blue-hover: #3367d6;
-            --google-red: #EA4335;
-            --google-yellow: #FBBC05;
-            --google-green: #34A853;
-            --google-grey: #f1f3f4;
-            --text-dark: #202124;
-            --text-grey: #5f6368;
-            --border-color: #dadce0;
+            --paper: #FAFAF7;
+            --panel: #EFEEE7;
+            --ink: #191D22;
+            --ink-soft: #565C64;
+            --line: #DAD7CC;
+            --blueprint: #0F6E8C;
+            --blueprint-dark: #0B5570;
+            --amber: #E8A33D;
+            --signal-red: #D14343;
+            --signal-green: #2F8558;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
         }
 
         * { box-sizing: border-box; }
 
-        body { 
-            font-family: 'Roboto', -apple-system, sans-serif; 
-            background: var(--google-grey); 
-            padding: 20px; 
-            color: var(--text-dark);
+        body {
+            font-family: var(--font-body);
+            background: var(--panel);
+            padding: 20px;
+            color: var(--ink);
             margin: 0;
         }
 
         /* --- LAYOUT GRID --- */
         .main-wrapper {
             display: flex;
-            flex-direction: row; 
+            flex-direction: row;
             gap: 30px;
             max-width: 1100px;
             margin: 0 auto;
@@ -51,145 +60,146 @@
         }
 
         .instructions-content {
-            background: white;
+            background: var(--paper);
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+            border: 1px solid var(--line);
         }
 
-        .tool-container { 
+        .tool-container {
             flex: 2;
-            background: white; 
-            padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15); 
+            background: var(--paper);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
             width: 100%;
         }
 
-        h1 { margin-top: 0; color: var(--text-dark); font-size: 24px; font-weight: 400; margin-bottom: 25px; }
-        h2 { font-size: 18px; margin-top: 0; color: var(--google-blue); }
-        p, li { font-size: 14px; line-height: 1.5; color: var(--text-grey); }
+        h1 { margin-top: 0; color: var(--ink); font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-bottom: 25px; }
+        h2 { font-size: 18px; margin-top: 0; font-family: var(--font-display); font-weight: 600; color: var(--blueprint); }
+        p, li { font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
         ul { padding-left: 20px; }
         li { margin-bottom: 8px; }
 
         /* --- FORM ELEMENTS --- */
         .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-dark); font-size: 14px; }
-        .sub-label { font-size: 12px; color: var(--text-grey); margin-bottom: 8px; margin-top: -4px; }
-        
-        /* Unified input styling */
-        input[type="text"], input[type="number"], select { 
-            width: 100%; 
-            padding: 10px 12px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 4px; 
-            font-size: 14px; 
-            color: var(--text-dark); 
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--ink); font-size: 14px; }
+        .sub-label { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; margin-top: -4px; }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: var(--font-body);
+            color: var(--ink);
             transition: all 0.2s;
-            height: 44px; /* Fixed Height for consistency */
+            height: 44px;
             margin: 0;
-            background: white;
+            background: var(--paper);
         }
 
-        /* FIX FOR TWITCHING: 
-           Instead of changing border-width (which moves layout), 
-           we use box-shadow to fake the thickness.
-        */
-        input:focus, select:focus { 
-            border-color: var(--google-blue);
-            box-shadow: 0 0 0 1px var(--google-blue); 
-            outline: none; 
-            padding: 10px 12px; /* Padding stays exactly the same */
+        input:focus, select:focus {
+            border-color: var(--blueprint);
+            box-shadow: 0 0 0 1px var(--blueprint);
+            outline: none;
+            padding: 10px 12px;
         }
-        
-        input[type="file"] { 
+
+        input[type="file"] {
             width: 100%; padding: 20px; height: auto;
-            background: #f8f9fa; border: 2px dashed var(--border-color); 
-            border-radius: 6px; text-align: center; cursor: pointer; color: var(--text-grey);
+            background: var(--panel); border: 2px dashed var(--line);
+            border-radius: 6px; text-align: center; cursor: pointer; color: var(--ink-soft);
         }
-        input[type="file"]:hover { background: #e8f0fe; border-color: var(--google-blue); }
+        input[type="file"]:hover { background: #E4EEF1; border-color: var(--blueprint); }
 
         /* --- BUTTONS --- */
-        button { font-family: 'Roboto', sans-serif; cursor: pointer; border: none; }
-        
-        .btn-add { 
-            background-color: var(--google-blue); 
-            color: white; 
-            border: none; 
-            padding: 0 20px; 
-            border-radius: 4px; 
-            font-weight: 500; 
-            height: 44px; /* Matches Input Height Exactly */
+        button { font-family: var(--font-body); cursor: pointer; border: none; }
+
+        .btn-add {
+            background-color: var(--blueprint);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            height: 44px;
             transition: background 0.2s;
             white-space: nowrap;
         }
-        .btn-add:hover { background-color: var(--google-blue-hover); }
+        .btn-add:hover { background-color: var(--blueprint-dark); }
 
-        .btn-process { 
-            width: 100%; padding: 14px; 
-            background-color: var(--google-blue); color: white; 
-            border-radius: 4px; font-size: 16px; font-weight: 500; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-top: 10px; letter-spacing: 0.5px; 
+        .btn-process {
+            width: 100%; padding: 14px;
+            background-color: var(--blueprint); color: white;
+            border-radius: 4px; font-size: 16px; font-weight: 600;
+            margin-top: 10px; letter-spacing: 0.3px;
         }
-        .btn-process:hover { background-color: var(--google-blue-hover); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-        .btn-process:disabled { background-color: var(--border-color); color: #fff; cursor: not-allowed; box-shadow: none; }
+        .btn-process:hover { background-color: var(--blueprint-dark); }
+        .btn-process:disabled { background-color: var(--line); color: #fff; cursor: not-allowed; box-shadow: none; }
 
         /* --- SIZE MANAGER --- */
-        .size-input-wrapper { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 12px; 
-            align-items: center; /* Changed from flex-end to center for stability */
+        .size-input-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
         }
         .size-input-group { flex: 1; }
-        .unit-select { flex: 0 0 70px; } 
-        
-        .size-list { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-            margin-top: 16px; 
+        .unit-select { flex: 0 0 70px; }
+
+        .size-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
             width: 100%;
         }
-        
-        .size-tag { 
-            padding: 6px 14px; border-radius: 18px; font-size: 13px; 
-            display: inline-flex; align-items: center; gap: 8px; color: white; 
-            font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.15); 
-            white-space: nowrap; 
+
+        .size-tag {
+            padding: 6px 14px; border-radius: 18px; font-size: 13px;
+            display: inline-flex; align-items: center; gap: 8px; color: white;
+            font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            white-space: nowrap;
         }
-        .size-remove { 
-            cursor: pointer; font-weight: bold; font-size: 16px; 
-            line-height: 1; margin-left: 2px; opacity: 0.8; 
+        .size-remove {
+            cursor: pointer; font-weight: bold; font-size: 16px;
+            line-height: 1; margin-left: 2px; opacity: 0.8;
         }
         .size-remove:hover { opacity: 1; }
 
         /* --- PREVIEW CANVAS --- */
-        #previewContainer { text-align: center; margin-top: 24px; display: none; background: #fff; border: 1px solid var(--border-color); padding: 16px; border-radius: 8px;}
+        #previewContainer { text-align: center; margin-top: 24px; display: none; background: var(--paper); border: 1px solid var(--line); padding: 16px; border-radius: 8px;}
         canvas { max-width: 100%; height: auto; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #eee; }
-        .preview-label { font-size: 16px; color: var(--text-dark); margin-bottom: 16px; font-weight: 500; }
-        .preview-legend { font-size: 13px; color: var(--text-grey); margin-bottom: 16px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
+        .preview-label { font-size: 16px; color: var(--ink); margin-bottom: 16px; font-weight: 600; font-family: var(--font-display); }
+        .preview-legend { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
         /* --- LOGS --- */
-        #status { margin-top: 20px; padding: 12px; background: var(--google-grey); border-radius: 4px; font-size: 13px; color: var(--text-dark); display: none; white-space: pre-line; max-height: 200px; overflow-y: auto; font-family: monospace; border-left: 4px solid var(--text-grey); }
-        .success { color: var(--google-green); font-weight: bold; }
-        .error { color: var(--google-red); font-weight: bold; }
+        #status { margin-top: 20px; padding: 12px; background: var(--panel); border-radius: 4px; font-size: 13px; color: var(--ink); display: none; white-space: pre-line; max-height: 200px; overflow-y: auto; font-family: var(--font-mono); border-left: 4px solid var(--blueprint); }
+        .success { color: var(--signal-green); font-weight: bold; }
+        .error { color: var(--signal-red); font-weight: bold; }
 
-        /* Donation Section Styles */
-        .donate-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
-        .donate-text { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; font-style: italic; }
+        /* Buy Me a Coffee card (standardised component — same on every tool page) */
+        .bmc-card { position: relative; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
+        .bmc-card__icon { font-size: 1.4rem; margin-bottom: 6px; }
+        .bmc-card__heading { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 6px; }
+        .bmc-card__text { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
+        .bmc-card__button { display: inline-flex; align-items: center; gap: 8px; background: var(--blueprint); color: #fff; text-decoration: none; font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 6px; transition: background .15s ease; }
+        .bmc-card__button:hover { background: var(--blueprint-dark); }
+        .bmc-card__button svg { width: 16px; height: 16px; flex-shrink: 0; }
 
         /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
             .main-wrapper {
-                flex-direction: column; 
+                flex-direction: column;
                 padding: 0;
             }
             .instructions-container {
                 width: 100%;
-                order: -1; 
+                order: -1;
                 margin-bottom: 0;
             }
             .tool-container {
@@ -204,9 +214,115 @@
     </style>
 </head>
 <body>
-{% include header.html %} 
+
+<!-- ============================================================ -->
+<!-- SITE HEADER -->
+<!-- ============================================================ -->
+<style>
+.site-header { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 100; font-family: var(--font-body); }
+.site-header__ruler { height: 4px; background-image: repeating-linear-gradient(90deg, var(--blueprint) 0 1px, transparent 1px 12px); opacity: 0.5; }
+.site-header__inner { max-width: 1140px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+.site-header__brand { text-decoration: none; color: var(--ink); line-height: 1.1; }
+.site-header__eyebrow { display: block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; color: var(--blueprint); text-transform: uppercase; margin-bottom: 2px; }
+.site-header__wordmark { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+.nav-toggle { display: none; flex-direction: column; gap: 4px; background: none; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; padding: 8px 10px; }
+.nav-toggle span { width: 18px; height: 2px; background: var(--ink); display: block; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.site-nav__list { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.site-nav__item { position: relative; }
+.site-nav__link { background: none; border: none; font: inherit; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; cursor: pointer; padding: 9px 12px; color: var(--ink); text-decoration: none; display: inline-block; border-radius: 4px; }
+.site-nav__link:hover, .site-nav__link:focus { color: var(--blueprint); background: var(--panel); }
+.dropdown { list-style: none; margin: 0; padding: 6px; position: absolute; top: 100%; left: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 28px rgba(25,29,34,0.10); min-width: 250px; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .15s ease, transform .15s ease, visibility .15s; }
+.has-dropdown:hover .dropdown, .has-dropdown:focus-within .dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+.dropdown li a { display: block; padding: 8px 10px; color: var(--ink); text-decoration: none; border-radius: 4px; font-size: 0.88rem; border-left: 2px solid transparent; }
+.dropdown li a:hover, .dropdown li a:focus { background: var(--panel); border-left-color: var(--blueprint); color: var(--blueprint-dark); }
+@media (max-width: 860px) {
+  .nav-toggle { display: flex; }
+  .site-nav { display: none; width: 100%; order: 3; }
+  .site-nav.is-open { display: block; }
+  .site-nav__list { flex-direction: column; gap: 0; }
+  .site-nav__item { width: 100%; }
+  .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; border: none; display: none; padding-left: 10px; }
+  .has-dropdown.is-open .dropdown { display: block; }
+  .site-header__inner { flex-wrap: wrap; }
+}
+</style>
+
+<header class="site-header">
+  <div class="site-header__ruler"></div>
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="https://pierrecochart.github.io/">
+      <span class="site-header__eyebrow">Free Web Toolkit</span>
+      <span class="site-header__wordmark">Pierre Cochart</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+      <span class="sr-only">Menu</span>
+    </button>
+
+    <nav class="site-nav" id="siteNav">
+      <ul class="site-nav__list">
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Image &amp; Media</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+            <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+            <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+            <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+            <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">SEO &amp; Content</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+            <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+            <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+            <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+            <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+            <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+            <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">PPC &amp; Analytics</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+            <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+            <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Development</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+            <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+            <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item">
+          <a class="site-nav__link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">SEO/PPC Help ↗</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
 <div class="main-wrapper">
-    
+
     <div class="instructions-container">
         <div class="instructions-content">
             <h2>How to Use</h2>
@@ -218,12 +334,15 @@
                 <li><strong>Download:</strong> A ZIP file containing all your cropped variations will download automatically.</li>
             </ul>
             <p style="font-size:12px; margin-top:15px; font-style:italic;">*Note: Non-pixel units (cm, in) are converted assuming 96 DPI screen resolution.</p>
-            
-            <div class="donate-section">
-                <p class="donate-text">This batch cropper is entirely free to use. If it has saved you some time, please consider buying me a coffee to support future updates. Cheers!</p>
-                <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank">
-                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important; width: auto !important;" >
-                </a>
+
+            <div class="bmc-card">
+              <div class="bmc-card__icon">☕</div>
+              <p class="bmc-card__heading">This tool is free to use</p>
+              <p class="bmc-card__text">If it saved you some time, consider buying me a coffee to support future updates.</p>
+              <a class="bmc-card__button" href="https://www.buymeacoffee.com/PierreCochart" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h14a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 12h1a2 2 0 0 1 2 2 3 3 0 0 1-3 3h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 3c-.5 1-.5 1.8 0 2.5M12 3c-.5 1-.5 1.8 0 2.5M16 3c-.5 1-.5 1.8 0 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                Buy me a coffee
+              </a>
             </div>
 
         </div>
@@ -231,7 +350,7 @@
 
     <div class="tool-container">
         <h1>Free Batch Image Cropper</h1>
-        
+
         <div class="form-group">
             <label for="baseName">File Base Name</label>
             <input type="text" id="baseName" value="CampaignV1" placeholder="e.g. CampaignV1">
@@ -266,7 +385,7 @@
         <div class="form-group">
             <label for="fileInput">Upload Images</label>
             <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect()">
-            
+
             <div id="previewContainer">
                 <div class="preview-label">Visual Preview</div>
                 <div id="previewLegend" class="preview-legend"></div>
@@ -279,6 +398,126 @@
         <div id="status"></div>
     </div>
 </div>
+
+<!-- ============================================================ -->
+<!-- SEO CONTENT BLOCK -->
+<!-- ============================================================ -->
+<style>
+.tool-content { max-width: 780px; margin: 64px auto; padding: 0 20px; font-family: var(--font-body); color: var(--ink); line-height: 1.65; }
+.tool-content h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 40px 0 14px; color: var(--ink); }
+.tool-content p { font-size: 0.98rem; color: var(--ink-soft); margin: 0 0 14px; }
+.faq-item { position: relative; border: 1px solid var(--line); border-radius: 6px; padding: 4px 16px; margin-bottom: 10px; background: var(--paper); }
+.faq-item::before, .faq-item::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+.faq-item::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.faq-item::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.faq-item summary { cursor: pointer; font-weight: 600; padding: 14px 0; font-size: 0.96rem; list-style: none; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; float: right; font-family: var(--font-mono); color: var(--blueprint); }
+.faq-item[open] summary::after { content: "–"; }
+.faq-item p { padding-bottom: 14px; margin: 0; }
+.related-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+.related-tools__card { position: relative; display: block; border: 1px solid var(--line); border-radius: 6px; padding: 18px; text-decoration: none; background: var(--paper); transition: border-color .15s ease; }
+.related-tools__card:hover { border-color: var(--blueprint); }
+.related-tools__card::before, .related-tools__card::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+.related-tools__card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.related-tools__card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.related-tools__eyebrow { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 6px; }
+.related-tools__name { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 4px; }
+.related-tools__desc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+@media (max-width: 720px) { .related-tools { grid-template-columns: 1fr; } }
+</style>
+
+<section class="tool-content">
+
+  <h2>What does the Bulk Image Cropper do?</h2>
+  <p>This tool crops and resizes a whole batch of images to multiple target sizes in one pass, entirely in your browser. It's built for anyone who needs the same creative in several dimensions at once — an ad campaign running 1250×600 and 1200×630 versions of the same banner, or a product shot that needs a square and a landscape crop for different placements.</p>
+  <p>Because everything runs client-side, your images are never uploaded to a server. Files stay on your device the whole time; the cropping happens locally using the browser's canvas engine, and the output is zipped and downloaded directly.</p>
+  <p>To use it: upload your source images, add as many target sizes as you need (in px, in, cm, or mm), and optionally set a bottom-trim percentage to strip out a watermark or footer strip before cropping. Every crop is centred automatically, and the preview shows exactly what will be kept before you commit.</p>
+
+  <h2>Frequently asked questions</h2>
+
+  <div class="faq-item">
+    <details>
+      <summary>Is the Bulk Image Cropper free to use?</summary>
+      <p>Yes. It's completely free, with no account, watermark, or usage limit. You can crop as many images as you like.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Are my images uploaded anywhere?</summary>
+      <p>No. Every crop is generated locally in your browser using the Canvas API — your files never leave your device or touch a server.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>What image formats are supported?</summary>
+      <p>You can upload any common image format your browser can decode (JPG, PNG, WebP, and more). Output is exported as JPG for consistent file sizes across all your crops.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Can I crop to more than one size at the same time?</summary>
+      <p>Yes — add as many target sizes as you need, and each uploaded image will be cropped to every size and bundled into a single ZIP download.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>What's the "Bottom Trim" option for?</summary>
+      <p>It removes a percentage of the image from the bottom before cropping — commonly used to strip out a watermark, caption bar, or footer strip that shouldn't appear in the final crop.</p>
+    </details>
+  </div>
+
+  <h2>Related tools</h2>
+  <div class="related-tools">
+    <a class="related-tools__card" href="https://pierrecochart.github.io/advanced-image-cropping-tool/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">Advanced Image Cropper</p>
+      <p class="related-tools__desc">Professional-grade cropping with custom aspect ratios and precision controls.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/image-to-webp-converter/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">Image to WebP Converter</p>
+      <p class="related-tools__desc">Convert your cropped exports to WebP for faster page load times.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/quickfav-favicon-maker/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">QuickFav Favicon Maker</p>
+      <p class="related-tools__desc">Generate consistent favicons from text, emojis, or images.</p>
+    </a>
+  </div>
+
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is the Bulk Image Cropper free to use?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It's completely free, with no account, watermark, or usage limit. You can crop as many images as you like." } },
+    { "@type": "Question", "name": "Are my images uploaded anywhere?", "acceptedAnswer": { "@type": "Answer", "text": "No. Every crop is generated locally in your browser using the Canvas API — your files never leave your device or touch a server." } },
+    { "@type": "Question", "name": "What image formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "You can upload any common image format your browser can decode (JPG, PNG, WebP, and more). Output is exported as JPG for consistent file sizes across all your crops." } },
+    { "@type": "Question", "name": "Can I crop to more than one size at the same time?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — add as many target sizes as you need, and each uploaded image will be cropped to every size and bundled into a single ZIP download." } },
+    { "@type": "Question", "name": "What's the \"Bottom Trim\" option for?", "acceptedAnswer": { "@type": "Answer", "text": "It removes a percentage of the image from the bottom before cropping — commonly used to strip out a watermark, caption bar, or footer strip that shouldn't appear in the final crop." } }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Bulk Image Cropper",
+  "url": "https://pierrecochart.github.io/image-cropper/",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any (runs in browser)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+  "creator": { "@type": "Person", "name": "Pierre Cochart", "url": "https://pierrecochart.github.io/" }
+}
+</script>
 
 <script>
     // --- STATE MANAGEMENT ---
@@ -307,8 +546,8 @@
         { w: 400, h: 250, unit: 'px' },
         { w: 1200, h: 630, unit: 'px' }
     ];
-    
-    let previewImageBitmap = null; 
+
+    let previewImageBitmap = null;
 
     function getColor(index) {
         return PALETTE[index % PALETTE.length];
@@ -318,7 +557,27 @@
     window.onload = function() {
         loadSettings();
         renderSizes();
+        initNav();
     };
+
+    function initNav() {
+        var toggle = document.getElementById('navToggle');
+        var nav = document.getElementById('siteNav');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function () {
+                var isOpen = nav.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', isOpen);
+            });
+        }
+        document.querySelectorAll('.has-dropdown > .site-nav__link').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (window.innerWidth > 860) return;
+                var parent = btn.closest('.has-dropdown');
+                var isOpen = parent.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', isOpen);
+            });
+        });
+    }
 
     function loadSettings() {
         const savedSizes = localStorage.getItem(STORAGE_KEY_SIZES);
@@ -338,20 +597,18 @@
     function renderSizes() {
         const list = document.getElementById('sizeList');
         list.innerHTML = '';
-        
+
         targetSizes.forEach((size, index) => {
             const color = getColor(index);
             const tag = document.createElement('div');
             tag.className = 'size-tag';
             tag.style.backgroundColor = color;
-            
-            // Text color for readability
+
             if (color === '#FBBC05') {
                 tag.style.color = '#333';
                 tag.style.boxShadow = "inset 0 0 0 1px rgba(0,0,0,0.1)";
             }
 
-            // Display unit if not px, or just px
             const unitDisplay = size.unit || 'px';
 
             tag.innerHTML = `
@@ -380,7 +637,7 @@
         targetSizes.push({ w, h, unit });
         saveSettings();
         renderSizes();
-        
+
         wInput.value = '';
         hInput.value = '';
         wInput.focus();
@@ -426,34 +683,30 @@
         const trimHeightPx = Math.floor(originalH * (trimPercent / 100));
         const effectiveH = originalH - trimHeightPx;
 
-        // Draw Trim Overlay
         const scaledTrimHeight = trimHeightPx * scale;
         const scaledTrimYPos = canvas.height - scaledTrimHeight;
-        
+
         if (scaledTrimHeight > 0) {
-            ctx.fillStyle = "rgba(234, 67, 53, 0.3)";
+            ctx.fillStyle = "rgba(209, 67, 67, 0.3)";
             ctx.fillRect(0, scaledTrimYPos, canvas.width, scaledTrimHeight);
-            ctx.strokeStyle = "#EA4335";
+            ctx.strokeStyle = "#D14343";
             ctx.lineWidth = 2;
             ctx.strokeRect(0, scaledTrimYPos, canvas.width, scaledTrimHeight);
         }
 
         const legendContainer = document.getElementById('previewLegend');
-        legendContainer.innerHTML = '<div class="legend-item"><span class="legend-color" style="background:rgba(234, 67, 53, 0.6)"></span> Trimmed</div>';
+        legendContainer.innerHTML = '<div class="legend-item"><span class="legend-color" style="background:rgba(209, 67, 67, 0.6)"></span> Trimmed</div>';
 
-        // Draw Crop Boxes
         targetSizes.forEach((size, index) => {
             const color = getColor(index);
-            
-            // Convert Unit to Pixels for calculation
+
             const factor = UNIT_TO_PX[size.unit || 'px'];
             const targetPxW = size.w * factor;
             const targetPxH = size.h * factor;
 
-            // Logic using pixel values
             const srcRatio = originalW / effectiveH;
             const dstRatio = targetPxW / targetPxH;
-            
+
             let cropBoxWInSrc, cropBoxHInSrc;
 
             if (srcRatio > dstRatio) {
@@ -535,19 +788,18 @@
                 const originalW = imgBitmap.width;
                 const originalH = imgBitmap.height;
                 const trimAmount = Math.floor(originalH * trimPercent);
-                const effectiveH = originalH - trimAmount; 
+                const effectiveH = originalH - trimAmount;
 
                 for (const size of targetSizes) {
-                    // Unit Conversion for Processing
                     const factor = UNIT_TO_PX[size.unit || 'px'];
                     const targetPxW = Math.round(size.w * factor);
                     const targetPxH = Math.round(size.h * factor);
 
                     const blob = await cropCenter(imgBitmap, originalW, effectiveH, targetPxW, targetPxH);
-                    
+
                     let fileName = "";
                     let sizeLabel = `${size.w}x${size.h}${size.unit||'px'}`;
-                    
+
                     if (totalFiles > 1) {
                         fileName = `${baseName}_${i + 1}_${sizeLabel}.jpg`;
                     } else {
@@ -566,7 +818,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             log("Download initiated!", false);
             const successMsg = document.createElement('div');
             successMsg.className = 'success';
@@ -614,7 +866,104 @@
         });
     }
 </script>
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#4285F4" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-{% include footer.html %}
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#0F6E8C" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+<!-- ============================================================ -->
+<!-- SITE FOOTER -->
+<!-- ============================================================ -->
+<style>
+.site-footer { background: var(--panel); border-top: 1px solid var(--line); margin-top: 60px; font-family: var(--font-body); }
+.site-footer__cta { border-bottom: 1px solid var(--line); }
+.site-footer__cta-inner { max-width: 1140px; margin: 0 auto; padding: 36px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.site-footer__cta-text { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 4px; }
+.site-footer__cta-heading { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; color: var(--ink); margin: 0; }
+.site-footer__cta-link { font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; color: #fff; background: var(--blueprint); text-decoration: none; padding: 12px 20px; border-radius: 6px; white-space: nowrap; transition: background .15s ease; }
+.site-footer__cta-link:hover { background: var(--blueprint-dark); }
+.site-footer__inner { max-width: 1140px; margin: 0 auto; padding: 40px 20px 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.site-footer__col h3 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.site-footer__col ul { list-style: none; margin: 0; padding: 0; }
+.site-footer__col li { margin-bottom: 8px; }
+.site-footer__col a { color: var(--ink); text-decoration: none; font-size: 0.9rem; }
+.site-footer__col a:hover { color: var(--blueprint); text-decoration: underline; }
+.site-footer__bottom { max-width: 1140px; margin: 0 auto; padding: 18px 20px 30px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.site-footer__bottom a { color: var(--ink-soft); }
+.site-footer__bottom a:hover { color: var(--blueprint); }
+@media (max-width: 860px) { .site-footer__inner { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<footer class="site-footer">
+  <div class="site-footer__cta">
+    <div class="site-footer__cta-inner">
+      <div>
+        <p class="site-footer__cta-text">Need more than a free tool?</p>
+        <p class="site-footer__cta-heading">Search Foundry runs SEO &amp; PPC strategy for growing brands.</p>
+      </div>
+      <a class="site-footer__cta-link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">Talk to the agency ↗</a>
+    </div>
+  </div>
+
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <h3>Image &amp; Media</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+        <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+        <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+        <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+        <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>SEO &amp; Content</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+        <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+        <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+        <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+        <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+        <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+        <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>PPC &amp; Analytics</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+        <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+        <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>Development</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+        <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+        <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <p>&copy; <span id="footerYear"></span> <a href="https://uk.linkedin.com/in/pierrecochart">Pierre Cochart</a>. Free, open-source, client-side tools.</p>
+    <p>Built &amp; maintained by <a href="https://searchfoundry.co.uk" target="_blank" rel="noopener">The Search Foundry</a></p>
+  </div>
+</footer>
+<script>
+  var footerYearEl = document.getElementById('footerYear');
+  if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+</script>
+
 </body>
 </html>
